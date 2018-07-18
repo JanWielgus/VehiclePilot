@@ -7,7 +7,7 @@
 #define _CONTROLPANELAPP_h
 
 #include <PacketSerial.h>
-#include "Komunikacja.h"
+#include "Communication.h"
 #include "typyBitowe.h"
 #include "config.h"
 

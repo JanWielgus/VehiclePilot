@@ -4,70 +4,67 @@
 // Date: 26.10.2017r.
 //
 
-#include "Komunikacja.h"
+#include "Communication.h"
 #include "ControlPanelApp.h"
+#include "CustomDiodeLib.h"
+#include "config.h"
 
-#define buzzer 12 // buzzer pin
+//SoftwareSerial software_serial(tx_pin, rx_pin); // zapasowy dla mudulu BT
 
-SoftwareSerial software_serial(tx_pin, rx_pin); // HC-12 TX Pin, HC-12 RX Pin
-
-
-long czas_ostatniego_pong = 0;
-boolean ostatni_pong = false; //stan ostatniego odebranego pongu
-boolean stan_sygnalu = false;
-
+CustomDiodeLibClass red(redDiodePin, true);
+CustomDiodeLibClass green(greenDiodePin, true);
 
 
 void setup()
 {
-	//Serial.begin(9600);
-	kom.init(&software_serial);
-	kom.setupConfigPacket();
-	cpa.init();
+	#ifdef _INO_DEBUG
+		Serial.begin(9600);
+		Serial.println("INO DEBUG has sterted");
+	#endif
+
+	com.init();
 	
-	pinMode(buzzer, OUTPUT);
+	// init diodes
+	red.init();
+	green.init();
 	
-	delay(100);
-	kom.wyslij(PILOT_RAMKA_CONFIG_TYPE);
-	digitalWrite(buzzer, HIGH);
-	delay(50);
-	digitalWrite(buzzer, LOW);
-	kom.wyslij(PILOT_RAMKA_CONFIG_TYPE);
-	delay(10);
-	digitalWrite(buzzer, HIGH);
-	delay(50);
-	digitalWrite(buzzer, LOW);
+	//kom.setupConfigPacket(); // zrobic to kompletnie inaczej
+	
+	//cpa.init(); // bedzie przerobione na obsluge z zewnetrznym urzadzeniem I2C !!!
+	
+	// PRZEROBIC NA tak jak jest w pomyslach (z nowym radiem)
+		delay(100);
+		com.wyslij(PILOT_RAMKA_CONFIG_TYPE);
+		red.setPattern(DIODE_ON);
+		green.setPattern(DIODE_ON);
+		delay(50);
+		green.setPattern(DIODE_OFF);
+		com.wyslij(PILOT_RAMKA_CONFIG_TYPE);
+		delay(10);
+		red.setPattern(DIODE_OFF);
 }
 
 void loop()
 {
 	//kom.odbierz();
-	//Serial.println(kom.zmiennaTestowa.value);
-	cpa.odbierz();
 	
-	if (kom.pong.b0 != ostatni_pong)
-	{
-		ostatni_pong = kom.pong.b0;
-		czas_ostatniego_pong = millis();
-	}
+	//cpa.odbierz(); // bedzie przerobione na zewnetrzne urzadzenie I2C
 	
-	if ((millis() - czas_ostatniego_pong) > 1000) stan_sygnalu = false;
-	else stan_sygnalu = true;
-	
-	kom.ping.b0 = !kom.ping.b0;
-	
-	kom.pilot.throttle = analogRead(A0);
+	com.pilot.throttle = analogRead(pinThrottle);
 	cpa.throttlePCapp = kom.pilot.throttle/4.1; // 0-250 dla apki na pc
 	
-	kom.pilot.throttle = map(kom.pilot.throttle, 10, 1023, 0, 1000);
-	kom.pilot.throttle = constrain(kom.pilot.throttle, 0, 1000);
+	com.pilot.throttle = map(kom.pilot.throttle, 10, 1023, 0, 1000);
+	com.pilot.throttle = constrain(kom.pilot.throttle, 0, 1000);
 	
-	kom.wyslij(PILOT_RAMKA_TEST_TYPE);
-	cpa.wyslij(cpa.KOMUN_RAMKA_ARDU_LIVE_TYPE);
+	//com.wyslij(PILOT_RAMKA_TEST_TYPE);
+	
+	//cpa.wyslij(cpa.KOMUN_RAMKA_ARDU_LIVE_TYPE); bedznie po I2C
 
-	if (stan_sygnalu == true) digitalWrite(LED_BUILTIN, HIGH);
-	else digitalWrite(LED_BUILTIN, LOW);
+	if (com.connectionState()) green.setPattern(DIODE_ON);
+	else green.setPattern(DIODE_OFF);
+	
+	red.runDiode();
+	green.runDiode();
 	
 	delay(48);
 }
-

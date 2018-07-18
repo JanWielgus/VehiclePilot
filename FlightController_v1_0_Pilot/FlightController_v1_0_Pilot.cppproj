@@ -211,6 +211,12 @@
     <Folder Include="__vm\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Communication.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Communication.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="config.h">
       <SubType>compile</SubType>
     </Compile>
