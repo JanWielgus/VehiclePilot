@@ -41,7 +41,7 @@ void setup()
 		green.setPattern(DIODE_OFF);
 		com.wyslij(PILOT_RAMKA_CONFIG_TYPE);
 		delay(10);
-		red.setPattern(DIODE_OFF);
+		red.setPattern(2);
 }
 
 void loop()
@@ -51,15 +51,21 @@ void loop()
 	//cpa.odbierz(); // bedzie przerobione na zewnetrzne urzadzenie I2C
 	
 	com.pilot.throttle = analogRead(pinThrottle);
-	cpa.throttlePCapp = kom.pilot.throttle/4.1; // 0-250 dla apki na pc
+	com.pilot.rotate = analogRead(pinRotate);
+	com.pilot.tilt_TB = analogRead(pinTiltTB);
+	com.pilot.tilt_LR = analogRead(pinTiltLR);
 	
-	com.pilot.throttle = map(kom.pilot.throttle, 10, 1023, 0, 1000);
-	com.pilot.throttle = constrain(kom.pilot.throttle, 0, 1000);
+	cpa.throttlePCapp = com.pilot.throttle/4.1; // 0-250 dla apki na pc
+	
+	// To jest ze starej wersji i tego ma nie byæ
+		com.pilot.throttle = map(kom.pilot.throttle, 10, 1023, 0, 1000);
+		com.pilot.throttle = constrain(kom.pilot.throttle, 0, 1000);
 	
 	//com.wyslij(PILOT_RAMKA_TEST_TYPE);
 	
 	//cpa.wyslij(cpa.KOMUN_RAMKA_ARDU_LIVE_TYPE); bedznie po I2C
 
+	// Naraznie testowe
 	if (com.connectionState()) green.setPattern(DIODE_ON);
 	else green.setPattern(DIODE_OFF);
 	

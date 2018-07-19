@@ -39,9 +39,8 @@ class CustomDiodeLibClass
 Patterns:
 	0 - OFF
 	1 - ON
-	2 - blink every 1 sec
-	3 - blink every interv
-	4 - 0 to 100 in interv time (if PWM)
-	5 - 100 to 0 in interv time (if PWM)
+	2 - blink every 1 sec or interv if proided
+	4 - 0 to 100 in 1 sec or in interv time if provided (if PWM)
+	5 - 100 to 0 in 1 sec or in interv time if provided (if PWM)
 
 */
