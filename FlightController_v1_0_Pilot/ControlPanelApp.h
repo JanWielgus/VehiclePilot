@@ -10,42 +10,63 @@
 #include "Communication.h"
 #include "typyBitowe.h"
 #include "config.h"
+#include <Wire.h>
 
 
 class ControlPanelAppClass
 {
- public:
-	PacketSerial pSerialUSB;
-	uint8_t buforT[MAX_SEND_SIZE];
-	
- public:
+	public:
 	void init();
 	void odbierz();
-	void odbierzPriv(const uint8_t* bufferR, size_t PacketSize);
-	void wyslij(uint8_t typRamki);
+	
+	struct
+	{
+		uint8_t throttle;
+		uint8_t rotate;
+		uint8_t tiltTB;
+		uint8_t tiltLR;
+	}sterVar;
+	
+	
+	
+	#ifdef CPA_I2C
+		public:
+		void wyslij();
+		bool newDataOccured = false; // True - od I2C przyszly nowe dane i trzeba je wyslac do drona
+		
+		
+	#else // UART0 -----------------------------
+		public:
+		PacketSerial pSerialUSB;
+		
+		public:
+		void odbierzPriv(const uint8_t* bufferR, size_t PacketSize);
+		void wyslij(uint8_t typRamki);
+		
+		public:
+		const uint8_t USB_SERIAL_PORT = 0; // Dla Serial
+		const uint8_t USB_BAUD_RATE = 9600;
+
+		// --- ramki ---
+		// wysylane
+		const uint8_t KOMUN_RAMKA_PC_1_SIZE = 5;
+		const uint8_t KOMUN_RAMKA_PC_1_TYPE = 0x00;
+
+		const uint8_t KOMUN_RAMKA_PC_PARAMETERS_SIZE = 23;
+		const uint8_t KOMUN_RAMKA_PC_PARAMETERS_TYPE = 0x01;
+		// odbierane
+		const uint8_t KOMUN_RAMKA_ARDU_LIVE_SIZE = 11;
+		const uint8_t KOMUN_RAMKA_ARDU_LIVE_TYPE = 0x00;
+
+		const uint8_t KOMUN_RAMKA_ARDU_2_SIZE = 30;
+		const uint8_t KOMUN_RAMKA_ARDU_2_TYPE = 0x01;
+		
+	#endif
+	
+ private:
 	bool sprawdzSumeKontr(const uint8_t* buffer, size_t PacketSize);
 	uint8_t liczSumeKontr(const uint8_t* buffer, size_t PacketSize);
-	
-	uint8_t throttlePCapp;
-	
-	
- public:
-	const uint8_t USB_SERIAL_PORT = 0; // Dla Serial
-	const uint8_t USB_BAUD_RATE = 9600;
 
-	// --- ramki ---
-	// wysylane
-	const uint8_t KOMUN_RAMKA_PC_1_SIZE = 5;
-	const uint8_t KOMUN_RAMKA_PC_1_TYPE = 0x00;
-
-	const uint8_t KOMUN_RAMKA_PC_PARAMETERS_SIZE = 23;
-	const uint8_t KOMUN_RAMKA_PC_PARAMETERS_TYPE = 0x01;
-	// odbierane
-	const uint8_t KOMUN_RAMKA_ARDU_LIVE_SIZE = 11;
-	const uint8_t KOMUN_RAMKA_ARDU_LIVE_TYPE = 0x00;
-
-	const uint8_t KOMUN_RAMKA_ARDU_2_SIZE = 30;
-	const uint8_t KOMUN_RAMKA_ARDU_2_TYPE = 0x01;
 };
 
 extern ControlPanelAppClass cpa;

@@ -14,6 +14,11 @@
 // DEBUG (only one could be uncommented)
 	//#define _INO_DEBUG
 	//#define _COM_DEBUG
+	
+
+// CONTROL_PANEL_APP
+	#define USE_PC_APP // Czy wlaczac obsluge apki pc. Jesli nie ma pidowania albo nie potrzeba czegos wyswietlac to nie ma sensu
+	#define CPA_I2C    // Brakuje protow UART dlatego komunikacja bedzie musiala przebiegac przez zewnetrzne urzadzenie I2C
 
 
 // <<<<<<<<<=====================     KOMUNIKACJA     =====================>>>>>>>>>
@@ -25,7 +30,7 @@
 	#define serialPort 1                      // Serial: 0, Serial1: 1, Serial2: 2, Serial3: 3
 	#define comSerial Serial1                 // Serial with transceiver
 	#define BAUD_RATE 9600                    // With transciever
-	#define MAX_SEND_SIZE 50                  // Size of the largest packet (could be higher than needed)
+	#define MAX_SEND_SIZE 56                  // Size of the largest packet (could be higher than needed)
 
 	// Szablon: nadawca_RAMKA_nazwa_SIZE/TYPE
 	
@@ -79,6 +84,10 @@
 	
 	#define redDiodePin 5
 	#define greenDiodePin 6
+	
+	
+// ADDRESSES
+	#define LCD_ADDRESS 0x3F
 
 
 
