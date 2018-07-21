@@ -121,24 +121,25 @@ ControlPanelAppClass cpa;
 	}
 
 
-	void ControlPanelAppClass::wyslij(uint8_t typRamki)
+	void ControlPanelAppClass::wyslij(uint8_t typRamki = 0x00)
 	{
-		buforT[1] = typRamki;
+		uint8_t bufT[11];
+		bufT[1] = typRamki;
 		
 		if (typRamki == KOMUN_RAMKA_ARDU_LIVE_TYPE)
 		{
 			//buforT[2] = --;
-			buforT[3] = throttlePCapp;
-			buforT[4] = kom.pilot.rotate;
-			buforT[5] = kom.pilot.tilt_TB;
-			buforT[6] = kom.pilot.tilt_LR;
-			buforT[7] = 0;
-			buforT[8] = 0;
-			buforT[9] = 0;
-			buforT[10] = 0;
+			bufT[3] = sterVar.throttle;
+			bufT[4] = sterVar.rotate;
+			bufT[5] = sterVar.tiltTB;
+			bufT[6] = sterVar.tiltLR;
+			bufT[7] = 0;
+			bufT[8] = 0;
+			bufT[9] = 0;
+			bufT[10] = 0;
 			
-			buforT[0] = liczSumeKontr(buforT, KOMUN_RAMKA_ARDU_LIVE_SIZE);
-			pSerialUSB.send(buforT, KOMUN_RAMKA_ARDU_LIVE_SIZE);
+			bufT[0] = liczSumeKontr(bufT, KOMUN_RAMKA_ARDU_LIVE_SIZE);
+			pSerialUSB.send(bufT, KOMUN_RAMKA_ARDU_LIVE_SIZE);
 		}
 	}
 	

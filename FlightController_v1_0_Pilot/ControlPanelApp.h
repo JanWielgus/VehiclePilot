@@ -19,12 +19,12 @@ class ControlPanelAppClass
 	void init();
 	void odbierz();
 	
-	struct
+	struct // Zmienne podzielone przez 4 tylko dla apki pc
 	{
 		uint8_t throttle;
-		uint8_t rotate;
-		uint8_t tiltTB;
-		uint8_t tiltLR;
+		int8_t rotate;
+		int8_t tiltTB;
+		int8_t tiltLR;
 	}sterVar;
 	
 	
@@ -41,7 +41,7 @@ class ControlPanelAppClass
 		
 		public:
 		void odbierzPriv(const uint8_t* bufferR, size_t PacketSize);
-		void wyslij(uint8_t typRamki);
+		void wyslij(uint8_t typRamki = 0x00);
 		
 		public:
 		const uint8_t USB_SERIAL_PORT = 0; // Dla Serial

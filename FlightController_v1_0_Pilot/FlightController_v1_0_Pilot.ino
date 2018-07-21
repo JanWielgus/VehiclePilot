@@ -60,22 +60,19 @@ void loop()
 	
 	#ifdef USE_PC_APP
 		static int32_t lastCpaRTime = 0; // czas oststniego odebrania danych od posrednika I2C pc app
-		if (millis()-lastCpaRTime > 300) // odbieranie duzej paczki
+		if (millis()-lastCpaRTime > 330) // odbieranie duzej paczki
 		{
 			cpa.odbierz(); // w config ustawia sie czy dziala przez UART0 czy I2C
 			lastCpaRTime = millis();
 		}
 	#endif
 	
+	// Read raw data
+	/* !!! Te zmienne juz sa na gotowe dane. Thr jest uint a resza to inty. Trzeba je odpowienio przeksztalcic (0 w srodek i wartosci ujemne)
 	com.pilot.throttle = analogRead(pinThrottle);
 	com.pilot.rotate = analogRead(pinRotate);
 	com.pilot.tilt_TB = analogRead(pinTiltTB);
-	com.pilot.tilt_LR = analogRead(pinTiltLR);
-	
-	cpa.sterVar.throttle = com.pilot.throttle/4; // 0-255 dla apki na pc
-	cpa.sterVar.rotate = com.pilot.rotate/4;
-	cpa.sterVar.tiltTB = com.pilot.tilt_TB/4;
-	cpa.sterVar.tiltLR = com.pilot.tilt_LR/4;
+	com.pilot.tilt_LR = analogRead(pinTiltLR);*/
 	
 	// To jest ze starej wersji i tego ma nie byæ
 		com.pilot.throttle = map(kom.pilot.throttle, 10, 1023, 0, 1000);
@@ -85,12 +82,18 @@ void loop()
 	//com.wyslij(PILOT_RAMKA_TEST_TYPE);   // DO PRZEBUDOWY
 	
 	#ifdef USE_PC_APP
+		// Calc steering data for pc app
+		cpa.sterVar.throttle = com.pilot.throttle/4; // 0-255 dla apki na pc
+		cpa.sterVar.rotate = com.pilot.rotate/4;
+		cpa.sterVar.tiltTB = com.pilot.tilt_TB/4;
+		cpa.sterVar.tiltLR = com.pilot.tilt_LR/4;
+		
 		cpa.wyslij(); // wyslij do apki pc
 	#endif
 	
 	
 	
-	// <<<<< ====== ---  RZCZY POBOCZNE  --- ====== >>>>>
+	// <<<<< ====== ---  RZECZY POBOCZNE  --- ====== >>>>>
 
 	// Naraznie testowe
 	if (com.connectionState()) green.setPattern(DIODE_ON);

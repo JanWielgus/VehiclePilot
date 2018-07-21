@@ -16,6 +16,14 @@
 #include "typyBitowe.h"
 #include "config.h"
 
+struct pidParams // jesli siê nie kompiluje to daæ stare - wszystkie zmienne oddzielnie lub umieœciæ t¹ strukturê gdzie indziej
+{
+	floatByte kP; // wzmocnienie P
+	floatByte kI; // wzmocnienie I
+	floatByte kD; // wzmocnienie D
+	uint8_t Imax; // anti-windup I
+};
+
 
 class CommunicationClass
 {
@@ -59,17 +67,19 @@ class CommunicationClass
 	bitByte chan;
 	bitByte option;
 	
-	uint32_t timeAfterSL;        // time after communication was lost (UPDATED AFTER connectionState() !!!)
+	uint32_t timeAfterSL; // time after communication was lost (UPDATED AFTER connectionState() !!!)
 	
 	
 	// == SENT ==
-	bitByte settingsConfirmation;        // booleany steruj¹ce
+	//bitByte settingsConfirmation;        // booleany steruj¹ce
+	bitByte bitsT1;                        // Bity do wyslania 1
+	bitByte bitsT2;                        // Bity do wyslania 2
 	struct steering
 	{
-		int16_t throttle;
-		int8_t tilt_TB; // <0 is backward
-		int8_t tilt_LR; // <0 is left
-		int8_t rotate; // >0 - right; <0 - left
+		uint16_t throttle;
+		int16_t tilt_TB; // <0 is backward
+		int16_t tilt_LR; // <0 is left
+		int16_t rotate; // >0 - right; <0 - left
 	}pilot;
 	// ...
 	
@@ -77,19 +87,29 @@ class CommunicationClass
 	struct configVar
 	{
 		// Poziomowanie
+		pidParams levelPID;
+		/*
 		floatByte kP_level;          // wzmocnienie P PID'u od poziomu (test: 3)
 		floatByte kI_level;          // wzmocnienie I PID'u od poziomu
 		floatByte kD_level;          // wzmocnienie D PID'u od poziomu  (test: 0.2)
 		uint8_t I_level_limiter;     // Ograniczenie cz³onu ca³kuj¹cego
+		*/
 		
 		// Utrzymanie kierunku
+		pidParams yawPID;
+		/*
 		floatByte kP_yaw;            // wzmocnienie P PID'u od osi z
 		floatByte kI_yaw;            // wzmocnienie I PID'u od osi z
 		floatByte kD_yaw;            // wzmocnienie D PID'u od osi z
+		*/
+		
+		pidParams altHoldPID;
 	}conf;
 	
 	// == RECEIVED ==
-	bitByte switchesR;                   // prze³¹czniki
+	//bitByte switchesR;                   // przelaczniki
+	bitByte bitsR1;                        // Odebrane bity 1
+	bitByte bitsR2;                        // Odebrane bity 2
 	// ...
 	
 	
