@@ -86,6 +86,10 @@
 	#define greenDiodePin 6
 	
 	
+// EWA filters betas
+	#define STEERING_FILTER_BETA 0.6
+	
+	
 // ADDRESSES
 	#define LCD_ADDRESS 0x3F
 

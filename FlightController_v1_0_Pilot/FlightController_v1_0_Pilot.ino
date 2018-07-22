@@ -67,26 +67,31 @@ void loop()
 		}
 	#endif
 	
-	// Read raw data
-	/* !!! Te zmienne juz sa na gotowe dane. Thr jest uint a resza to inty. Trzeba je odpowienio przeksztalcic (0 w srodek i wartosci ujemne)
-	com.pilot.throttle = analogRead(pinThrottle);
-	com.pilot.rotate = analogRead(pinRotate);
-	com.pilot.tilt_TB = analogRead(pinTiltTB);
-	com.pilot.tilt_LR = analogRead(pinTiltLR);*/
+// Obliczanie drazkow
+	static float lastThrottle=0;
+	static float lastRotate=0;
+	static float lastTiltTB=0;
+	static float lastTIltLR=0;
+	// EWA filters
+	lastThrottle = STEERING_FILTER_BETA*lastThrottle + (1-STEERING_FILTER_BETA)*analogRead(pinThrottle);
+	lastRotate = STEERING_FILTER_BETA*lastRotate + (1-STEERING_FILTER_BETA)*analogRead(pinRotate);
+	lastTiltTB = STEERING_FILTER_BETA*lastTiltTB + (1-STEERING_FILTER_BETA)*analogRead(pinTiltTB);
+	lastTIltLR = STEERING_FILTER_BETA*lastTIltLR + (1-STEERING_FILTER_BETA)*analogRead(pinTiltLR);
+	// maps ans constrains (final step)
+	com.pilot.throttle = constrain(map(long(lastThrottle), 960, 65, 0, 1000), 0, 1000);
+	com.pilot.rotate = constrain(map(long(lastRotate), 968, 50, -450, 450), -450, 450);
+	com.pilot.tilt_TB = constrain(map(long(lastTiltTB), 900, 20, -450, 450), -450, 450);
+	com.pilot.tilt_LR = constrain(map(long(lastTIltLR), 982, 67, -450, 450), -450, 450);
 	
-	// To jest ze starej wersji i tego ma nie byæ
-		com.pilot.throttle = map(kom.pilot.throttle, 10, 1023, 0, 1000);
-		com.pilot.throttle = constrain(kom.pilot.throttle, 0, 1000);
-	// tego ^^^
 	
 	//com.wyslij(PILOT_RAMKA_TEST_TYPE);   // DO PRZEBUDOWY
 	
 	#ifdef USE_PC_APP
 		// Calc steering data for pc app
-		cpa.sterVar.throttle = com.pilot.throttle/4; // 0-255 dla apki na pc
-		cpa.sterVar.rotate = com.pilot.rotate/4;
-		cpa.sterVar.tiltTB = com.pilot.tilt_TB/4;
-		cpa.sterVar.tiltLR = com.pilot.tilt_LR/4;
+		cpa.sterVar.throttle = com.pilot.throttle/4; //    0:250 dla apki na pc
+		cpa.sterVar.rotate = com.pilot.rotate/3;     // -150:150
+		cpa.sterVar.tiltTB = com.pilot.tilt_TB/3;    // -150:150
+		cpa.sterVar.tiltLR = com.pilot.tilt_LR/3;    // -150:150
 		
 		cpa.wyslij(); // wyslij do apki pc
 	#endif
