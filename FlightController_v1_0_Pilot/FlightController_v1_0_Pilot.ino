@@ -22,7 +22,7 @@ void setup()
 	#ifdef _INO_DEBUG
 		Serial.begin(9600);
 		Serial.println("INO DEBUG has sterted");
-	#endif
+#endif
 
 	lcd.init(); // I2C
 	com.init();
@@ -31,10 +31,8 @@ void setup()
 	red.init();
 	green.init();
 	
-	//kom.setupConfigPacket(); // zrobic to kompletnie inaczej
-	
-	cpa.init(); // bedzie przerobione na obsluge z zewnetrznym urzadzeniem I2C !!!
-	//Wire.setClock(400000L); // 400kHz
+	cpa.init();
+	//Wire.setClock(400000L); // 400kHz  DO PRZETESTOWANIA !!! jak zadziala to uzyc z tym
 	
 	lcd.backlight();
 	lcd.setCursor(0,0);
@@ -82,6 +80,17 @@ void loop()
 	com.pilot.rotate = constrain(map(long(lastRotate), 968, 50, -450, 450), -450, 450);
 	com.pilot.tilt_TB = constrain(map(long(lastTiltTB), 900, 20, -450, 450), -450, 450);
 	com.pilot.tilt_LR = constrain(map(long(lastTIltLR), 982, 67, -450, 450), -450, 450);
+	
+	#ifdef _INO_DEBUG
+		Serial.print("DRAZKI: THR: ");
+		Serial.print(com.pilot.throttle);
+		Serial.print("\tROT: ");
+		Serial.print(com.pilot.rotate);
+		Serial.print("\tTB: ");
+		Serial.print(com.pilot.tilt_TB);
+		Serial.print("\tLR: ");
+		Serial.println(com.pilot.tilt_LR);
+#endif
 	
 	
 	//com.wyslij(PILOT_RAMKA_TEST_TYPE);   // DO PRZEBUDOWY
