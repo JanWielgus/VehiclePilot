@@ -33,5 +33,34 @@ union floatByte
 	char bajt[4];
 };
 
+//////////////////////////////////////////////////////////////////////////
+
+union int32Byte
+{
+	int32_t value;
+	char bajt[4];
+};
+
+
+union uint32Byte
+{
+	uint32_t value;
+	char bajt[4];
+};
+
+
+union int16Byte
+{
+	int16_t value;
+	char bajt[2];
+};
+
+
+union uint16Byte
+{
+	uint16_t value;
+	char bajt[2];
+};
+
 
 #endif /* TYPYBITOWE_H_ */
