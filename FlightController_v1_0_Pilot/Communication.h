@@ -72,13 +72,13 @@ class CommunicationClass
 	// == SENT ==
 		struct //steering
 		{
-			uint16Byte throttle;
-			int16Byte rotate;           // >0 - right; <0 - left
-			int16Byte tilt_TB;          // <0 is backward
-			int16Byte tilt_LR;          // <0 is left
+			uint16_t throttle;
+			int16_t rotate;           // >0 - right; <0 - left
+			int16_t tilt_TB;          // <0 is backward
+			int16_t tilt_LR;          // <0 is left
 		}pilot;
-		uint16Byte distanceFromPilot;   // Odleglosc od pilota
-		uint16Byte directionToPilot;    // Kierunek do pilota
+		uint16_t distanceFromPilot;   // Odleglosc od pilota
+		uint16_t directionToPilot;    // Kierunek do pilota
 		uint8_t flightMode;             // Tryb lotu
 		uint8_t armState;               // Uzbrajanie
 		uint8_t randomTxValue;          // Losowa wartosc dla drona	
@@ -113,7 +113,7 @@ class CommunicationClass
 		// ODPOWIEDNIE PRZETWARZANIE ODEBRANYCH ZMIENNYCH W FUNKCJI ODBIERANIA (na przyklad dzielenie przez 10)
 		float cellVoltage[6];           // napiecie na poszeczegolnych celach [V]
 		float pitch, roll;              // przechylenie i pochylenie drona [stopnie]
-		uint16Byte heading;             // heading (kat wzgledem polnocy) [stopnie]
+		uint16_t heading;               // heading (kat wzgledem polnocy) [stopnie]
 		float altitude;                 // wysokosc [m]
 		int32Byte pos_longInt, pos_latInt; // Dlugosc i szerokosc geograficzna * 10^6? (zobaczyc czy to czy float)
 		//float pos_longF, pos_latF;      //
