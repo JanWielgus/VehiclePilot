@@ -34,26 +34,30 @@
 
 	// Szablon: nadawca_RAMKA_nazwa_SIZE/TYPE
 	
-	/* DO ZAPROJEKTOWANIA OD NOWA
 	
-	// -- wysy³ane --
-	#define PILOT_RAMKA_STEROWANIE_SIZE 3
-	#define PILOT_RAMKA_STEROWANIE_TYPE 0x00
-
-	#define PILOT_RAMKA_DANE_SIZE 4
-	#define PILOT_RAMKA_DANE_TYPE 0x01
-
-	#define PILOT_RAMKA_TEST_SIZE 8
-	#define PILOT_RAMKA_TEST_TYPE 0x02
+	// --  SEND  --
+		// Wersja 1 - rozszerzona (pelna)
+		#define PILOT_RAMKA_VER1_SIZE x
+		#define PILOT_RAMKA_VER1_TYPE 0x00
+		
+		// Wersja 2 - podstawowa (narazie bez)
+		//#define PILOT_RAMKA_VER2_SIZE x
+		//#define PILOT_RAMKA_VER1_TYPE 0x01
 	
-	#define PILOT_RAMKA_CONFIG_SIZE 23
-	#define PILOT_RAMKA_CONFIG_TYPE 0x03
-	// -- odebrane --
-	#define DRON_RAMKA_POZYCJA_SIZE 6
-	#define DRON_RAMKA_POZYCJA_TYPE 0x05
-
-	#define DRON_RAMKA_TEST_SIZE 6
-	#define DRON_RAMKA_TEST_TYPE 0x06  */
+	// --  RECEIVE  --
+		// Wersja 1 - rozszerzona (pelna)
+		#define DRON_RAMKA_VER1_SIZE x
+		#define DRON_RAMKA_VER1_TYPE 0x00
+	
+		// Wersja 2 - podstawowa (narazie bez)
+		//#define DRON_RAMKA_VER2_SIZE x
+		//#define DRON_RAMKA_VER2_TYPE 0x01
+	
+		// Wersja 3 - po uzbrojeniu (takze PID request)
+		#define DRON_RAMKA_VER3_SIZE x
+		#define DRON_RAMKA_VER3_TYPE 0x02
+	
+	
 	
 	// times [ms] after vehicle set ... power; eg. after x[ms] high power is set
 	#define MP_SET_TIME 1100  // Medium power (21dBm)
