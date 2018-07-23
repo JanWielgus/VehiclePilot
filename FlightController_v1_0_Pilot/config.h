@@ -30,14 +30,14 @@
 	#define serialPort 1                      // Serial: 0, Serial1: 1, Serial2: 2, Serial3: 3
 	#define comSerial Serial1                 // Serial with transceiver
 	#define BAUD_RATE 9600                    // With transciever
-	#define MAX_SEND_SIZE 56                  // Size of the largest packet (could be higher than needed)
+	#define MAX_SEND_SIZE 45                  // Size of the largest packet (could be higher than needed)
 
 	// Szablon: nadawca_RAMKA_nazwa_SIZE/TYPE
 	
 	
 	// --  SEND  --
 		// Wersja 1 - rozszerzona (pelna)
-		#define PILOT_RAMKA_VER1_SIZE x
+		#define PILOT_RAMKA_VER1_SIZE 26
 		#define PILOT_RAMKA_VER1_TYPE 0x00
 		
 		// Wersja 2 - podstawowa (narazie bez)
@@ -45,12 +45,12 @@
 		//#define PILOT_RAMKA_VER1_TYPE 0x01
 		
 		// Wersja 3 - parametry PID
-		#define PILOT_RAMKA_VER3_SIZE x
+		#define PILOT_RAMKA_VER3_SIZE 41
 		#define PILOT_RAMKA_VER3_TYPE 0x02
 	
 	// --  RECEIVE  --
 		// Wersja 1 - rozszerzona (pelna)
-		#define DRON_RAMKA_VER1_SIZE x
+		#define DRON_RAMKA_VER1_SIZE 32
 		#define DRON_RAMKA_VER1_TYPE 0x00
 	
 		// Wersja 2 - podstawowa (narazie bez)
@@ -58,7 +58,7 @@
 		//#define DRON_RAMKA_VER2_TYPE 0x01
 	
 		// Wersja 3 - po uzbrojeniu (takze PID request)
-		#define DRON_RAMKA_VER3_SIZE x
+		#define DRON_RAMKA_VER3_SIZE 20
 		#define DRON_RAMKA_VER3_TYPE 0x02
 	
 	

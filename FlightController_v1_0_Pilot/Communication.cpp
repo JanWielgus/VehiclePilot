@@ -57,11 +57,46 @@ void CommunicationClass::odbierz()
 
 void CommunicationClass::odbierzPriv(const uint8_t* bufferR, size_t PacketSize)
 {
-	// przyklad: if (bufferR[1] == DRON_RAMKA_TEST_TYPE && PacketSize == DRON_RAMKA_TEST_SIZE && sprawdzSumeKontr(bufferR, PacketSize))
-	//odbieranie do zmiennych
+	// VER 1 - pelna
+	if (bufferR[1]==DRON_RAMKA_VER1_TYPE && PacketSize==DRON_RAMKA_VER1_SIZE && sprawdzSumeKontr(bufferR, PacketSize))
+	{
+		for (int i=0; i<6; i++)
+			cellVoltage[i] = bufferR[i+2] / 10.0;
+		pitch = bufferR[8];
+		roll = bufferR[9];
+		heading = word(bufferR[11], bufferR[10]);
+		altitude = word(bufferR[13], bufferR[12]);
+		for (int i=0; i<4; i++)
+			pos_longInt.bajt[i] = bufferR[i+14];
+		for (int i=0; i<4; i++)
+			pos_longInt.bajt[i] = bufferR[i+18];
+		randomRxValue = bufferR[22];
+		errorList1.bajt = bufferR[23];
+		errorList2.bajt = bufferR[24];
+		bitsRx1 = bufferR[25];
+		// zapas 6 x uint8 (ostatnie [31])
+		
+		if_odbierzPriv = true;
+	}
 	
+	/*
+		VER 2 - podstawowa
+	*/
 	
-	if_odbierzPriv = true;
+	// VER 3 - po uzbrojeniu i PID request
+	else if (bufferR[1]==DRON_RAMKA_VER3_TYPE && PacketSize==DRON_RAMKA_VER3_SIZE && sprawdzSumeKontr(bufferR, PacketSize))
+	{
+		for (int i=0; i<4; i++)
+			takeoff.posLongInt.bajt[i] = bufferR[i+2];
+		for (int i=0; i<4; i++)
+			takeoff.posLatInt.bajt[i] = bufferR[i+6];
+		for (int i=0; i<4; i++)
+			takeoff.pressure.bajt[i] = bufferR[i+10];
+		// zapas 5 x uint8
+		pid_params_request = bufferR[19];
+		
+		// if_odbierzPriv = true; // Tu raczej nie ma znaczenia, musi byc odebrana VER1
+	}
 }
 
 
@@ -70,16 +105,72 @@ void CommunicationClass::wyslij(uint8_t typRamki)
 {
 	buforT[1] = typRamki;
 	
-	/* PRZYKLAD:
-	if (typRamki == PILOT_RAMKA_TEST_TYPE)
-		buforT[7] = ping.bajt;
-		buforT[0] = liczSumeKontr(buforT, PILOT_RAMKA_TEST_SIZE);
-		pSerial.send(buforT, PILOT_RAMKA_TEST_SIZE);
-	else if (typRamki == PILOT_RAMKA_STEROWANIE_TYPE)*/
+	// VER1 - pelna
+	if (typRamki == PILOT_RAMKA_VER1_TYPE)
+	{
+		buforT[2] = lowByte(pilot.throttle); // Ewentualnie this->...
+		buforT[3] = highByte(pilot.throttle);
+		buforT[4] = lowByte(pilot.rotate);
+		buforT[5] = highByte(pilot.rotate);
+		buforT[6] = lowByte(pilot.tilt_TB);
+		buforT[7] = highByte(pilot.tilt_TB);
+		buforT[8] = lowByte(pilot.tilt_LR);
+		buforT[9] = highByte(pilot.tilt_LR);
+		buforT[10] = lowByte(distanceFromPilot);
+		buforT[11] = highByte(distanceFromPilot);
+		buforT[12] = lowByte(directionToPilot);
+		buforT[13] = highByte(directionToPilot);
+		buforT[14] = flightMode;
+		buforT[15] = armState;
+		buforT[16] = randomTxValue;
+		buforT[17] = bitsTx1.bajt;
+		buforT[18] = bitsTx2.bajt;
+		buforT[19] = signalLostScenario;
+		for (int i=0; i<6; i++) // zerowanie zapasu
+			buforT[i+20] = 0;
+		// zapas 6 x uint8 (ostatnie [25])
+		
+		buforT[0] = liczSumeKontr(buforT, PILOT_RAMKA_VER1_SIZE);
+		pSerial.send(buforT, PILOT_RAMKA_VER1_SIZE);
+	}
 	
-	// zmienne do bufora
-	//w kazdym if'ie bufor[0] i send
+	/*
+		VER2 - podstawowa
+	*/
 	
+	// VER3 - parametry PID
+	else if (typRamki == PILOT_RAMKA_VER3_TYPE)
+	{
+		// Leveling
+		for (int i=0; i<4; i++)
+			buforT[i+2] = conf.levelPID.kP.bajt[i];
+		for (int i=0; i<4; i++)
+			buforT[i+6] = conf.levelPID.kI.bajt[i];
+		for (int i=0; i<4; i++)
+			buforT[i+10] = conf.levelPID.kD.bajt[i];
+		buforT[14] = conf.levelPID.Imax;
+		
+		// Yaw
+		for (int i=0; i<4; i++)
+			buforT[i+15] = conf.yawPID.kP.bajt[i];
+		for (int i=0; i<4; i++)
+			buforT[i+19] = conf.yawPID.kI.bajt[i];
+		for (int i=0; i<4; i++)
+			buforT[i+23] = conf.yawPID.kD.bajt[i];
+		buforT[27] = conf.yawPID.Imax;
+		
+		// Alt hold
+		for (int i=0; i<4; i++)
+			buforT[i+28] = conf.altHoldPID.kP.bajt[i];
+		for (int i=0; i<4; i++)
+			buforT[i+32] = conf.altHoldPID.kI.bajt[i];
+		for (int i=0; i<4; i++)
+			buforT[i+36] = conf.altHoldPID.kD.bajt[i];
+		buforT[40] = conf.altHoldPID.Imax;
+		
+		buforT[0] = liczSumeKontr(buforT, PILOT_RAMKA_VER3_SIZE);
+		pSerial.send(buforT, PILOT_RAMKA_VER3_SIZE);
+	}
 }
 
 
