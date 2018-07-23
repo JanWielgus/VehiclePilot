@@ -43,6 +43,10 @@
 		// Wersja 2 - podstawowa (narazie bez)
 		//#define PILOT_RAMKA_VER2_SIZE x
 		//#define PILOT_RAMKA_VER1_TYPE 0x01
+		
+		// Wersja 3 - parametry PID
+		#define PILOT_RAMKA_VER3_SIZE x
+		#define PILOT_RAMKA_VER3_TYPE 0x02
 	
 	// --  RECEIVE  --
 		// Wersja 1 - rozszerzona (pelna)

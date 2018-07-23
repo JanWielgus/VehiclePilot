@@ -60,6 +60,7 @@ class CommunicationClass
 	
 // ===== VARIABLES =====
  public:
+	// radio paramters
 	uint8_t head;
 	uint8_t addh;
 	uint8_t addl;
@@ -67,56 +68,76 @@ class CommunicationClass
 	bitByte chan;
 	bitByte option;
 	
-	uint32_t timeAfterSL; // time after communication was lost (UPDATED AFTER connectionState() !!!)
-	
 	
 	// == SENT ==
-	//bitByte settingsConfirmation;        // booleany steruj¹ce
-	bitByte bitsT1;                        // Bity do wyslania 1
-	bitByte bitsT2;                        // Bity do wyslania 2
-	struct steering
-	{
-		uint16_t throttle;
-		int16_t tilt_TB; // <0 is backward
-		int16_t tilt_LR; // <0 is left
-		int16_t rotate; // >0 - right; <0 - left
-	}pilot;
-	// ...
-	
-	// Zmienne konfiguracji drona
-	struct configVar
-	{
-		// Poziomowanie
-		pidParams levelPID;
-		/*
-		floatByte kP_level;          // wzmocnienie P PID'u od poziomu (test: 3)
-		floatByte kI_level;          // wzmocnienie I PID'u od poziomu
-		floatByte kD_level;          // wzmocnienie D PID'u od poziomu  (test: 0.2)
-		uint8_t I_level_limiter;     // Ograniczenie cz³onu ca³kuj¹cego
-		*/
+		struct //steering
+		{
+			uint16Byte throttle;
+			int16Byte rotate;           // >0 - right; <0 - left
+			int16Byte tilt_TB;          // <0 is backward
+			int16Byte tilt_LR;          // <0 is left
+		}pilot;
+		uint16Byte distanceFromPilot;   // Odleglosc od pilota
+		uint16Byte directionToPilot;    // Kierunek do pilota
+		uint8_t flightMode;             // Tryb lotu
+		uint8_t armState;               // Uzbrajanie
+		uint8_t randomTxValue;          // Losowa wartosc dla drona	
+		bitByte bitsTx1, bitsTx2;       // Bity do wyslania
+		uint8_t signalLostScenario;     // Scenariusz utraty zasiegu
+		// 6x uint8 zapasu
 		
-		// Utrzymanie kierunku
-		pidParams yawPID;
-		/*
-		floatByte kP_yaw;            // wzmocnienie P PID'u od osi z
-		floatByte kI_yaw;            // wzmocnienie I PID'u od osi z
-		floatByte kD_yaw;            // wzmocnienie D PID'u od osi z
-		*/
+		// Zmienne konfiguracji drona
+		struct configVar
+		{
+			// Poziomowanie
+			pidParams levelPID;
+			/*
+			floatByte kP_level;          // wzmocnienie P PID'u od poziomu (test: 3)
+			floatByte kI_level;          // wzmocnienie I PID'u od poziomu
+			floatByte kD_level;          // wzmocnienie D PID'u od poziomu  (test: 0.2)
+			uint8_t I_level_limiter;     // Ograniczenie cz³onu ca³kuj¹cego
+			*/
 		
-		pidParams altHoldPID;
-	}conf;
+			// Utrzymanie kierunku
+			pidParams yawPID;
+			/*
+			floatByte kP_yaw;            // wzmocnienie P PID'u od osi z
+			floatByte kI_yaw;            // wzmocnienie I PID'u od osi z
+			floatByte kD_yaw;            // wzmocnienie D PID'u od osi z
+			*/
+		
+			pidParams altHoldPID;
+		}conf;
 	
 	// == RECEIVED ==
-	//bitByte switchesR;                   // przelaczniki
-	bitByte bitsR1;                        // Odebrane bity 1
-	bitByte bitsR2;                        // Odebrane bity 2
-	// ...
+		// ODPOWIEDNIE PRZETWARZANIE ODEBRANYCH ZMIENNYCH W FUNKCJI ODBIERANIA (na przyklad dzielenie przez 10)
+		float cellVoltage[6];           // napiecie na poszeczegolnych celach [V]
+		float pitch, roll;              // przechylenie i pochylenie drona [stopnie]
+		uint16Byte heading;             // heading (kat wzgledem polnocy) [stopnie]
+		float altitude;                 // wysokosc [m]
+		int32Byte pos_longInt, pos_latInt; // Dlugosc i szerokosc geograficzna * 10^6? (zobaczyc czy to czy float)
+		//float pos_longF, pos_latF;      //
+		uint8_t randomRxValue;          // Odebrana wartosc losowa
+		bitByte errorList1, errorList2; // B³êdy
+		bitByte bitsRx1;// bitsRx2;     // Bity odebrane
+		// 6 x uint8 zapasu
+		
+		// Takeoff values
+		struct
+		{
+			int32Byte posLongInt, posLatInt;
+			uint32Byte pressure;
+		} takeoff;
+		// 5x uint8 zapas
+		uint8_t PID_params_request;
+		
 	
 	
  private:
 	uint16_t lost_packets;       // number of lost packets
 	bool if_odbierzPriv;         // true if odbierzPriv was called
 	uint32_t con_lost_time;      // time when communication lost
+	uint32_t timeAfterSL;        // time after communication was lost (UPDATED WHEN connectionState() called !!!)
 	
 	bool changeInTxParams = false; // true - byla zmiana w ustawieniach nadajnika i trzba ponownie wyslac parametry
 };
