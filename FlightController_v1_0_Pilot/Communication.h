@@ -77,8 +77,8 @@ class CommunicationClass
 			int16_t tilt_TB;          // <0 is backward
 			int16_t tilt_LR;          // <0 is left
 		}pilot;
-		uint16_t distanceFromPilot;   // Odleglosc od pilota
-		uint16_t directionToPilot;    // Kierunek do pilota
+		uint16_t distanceFromPilot;   // Odleglosc od pilota [decymetr]
+		uint16_t directionToPilot;    // Kierunek do pilota [stopnie]
 		uint8_t flightMode;             // Tryb lotu
 		uint8_t armState;               // Uzbrajanie
 		uint8_t randomTxValue;          // Losowa wartosc dla drona	
@@ -87,7 +87,7 @@ class CommunicationClass
 		// 6x uint8 zapasu
 		
 		// Zmienne konfiguracji drona
-		struct configVar
+		struct //configVar
 		{
 			// Poziomowanie
 			pidParams levelPID;
@@ -111,25 +111,25 @@ class CommunicationClass
 	
 	// == RECEIVED ==
 		// ODPOWIEDNIE PRZETWARZANIE ODEBRANYCH ZMIENNYCH W FUNKCJI ODBIERANIA (na przyklad dzielenie przez 10)
-		float cellVoltage[6];           // napiecie na poszeczegolnych celach [V]
-		float pitch, roll;              // przechylenie i pochylenie drona [stopnie]
-		uint16_t heading;               // heading (kat wzgledem polnocy) [stopnie]
-		float altitude;                 // wysokosc [m]
+		float cellVoltage[6];              // napiecie na poszeczegolnych celach [decy V]
+		uint8_t pitch, roll;               // przechylenie i pochylenie drona [stopnie]
+		uint16_t heading;                  // heading (kat wzgledem polnocy) [stopnie]
+		int16_t altitude;                  // wysokosc [cm]
 		int32Byte pos_longInt, pos_latInt; // Dlugosc i szerokosc geograficzna * 10^6? (zobaczyc czy to czy float)
-		//float pos_longF, pos_latF;      //
-		uint8_t randomRxValue;          // Odebrana wartosc losowa
-		bitByte errorList1, errorList2; // B³êdy
-		bitByte bitsRx1;// bitsRx2;     // Bity odebrane
+		//float pos_longF, pos_latF;       // alternatywa
+		uint8_t randomRxValue;             // Odebrana wartosc losowa
+		bitByte errorList1, errorList2;    // Bledy
+		bitByte bitsRx1;// bitsRx2;        // Bity odebrane
 		// 6 x uint8 zapasu
 		
 		// Takeoff values
 		struct
 		{
 			int32Byte posLongInt, posLatInt;
-			uint32Byte pressure;
+			uint32Byte pressure; // [Pa]
 		} takeoff;
 		// 5x uint8 zapas
-		uint8_t PID_params_request;
+		uint8_t pid_params_request;
 		
 	
 	
