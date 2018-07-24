@@ -41,7 +41,7 @@ ControlPanelAppClass cpa;
 	void ControlPanelAppClass::wyslij()
 	{
 		uint8_t bufT[11];
-		Wire.beginTransmission(8) // Transmit to device #8
+		Wire.beginTransmission(8); // Transmit to device #8
 		
 		bufT[1] = sterVar.throttle;
 		bufT[2] = sterVar.rotate;

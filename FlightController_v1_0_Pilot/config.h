@@ -85,10 +85,10 @@
 	
 	#define buzzer 12 // buzzer pin
 	
-	#define pinThrottle A0;
-	#define pinRotate A1;
-	#define pinTiltTB A2;
-	#define pinTiltLR A3;
+	#define pinThrottle A0
+	#define pinRotate A1
+	#define pinTiltTB A2
+	#define pinTiltLR A3
 	
 	#define redDiodePin 5
 	#define greenDiodePin 6

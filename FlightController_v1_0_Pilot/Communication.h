@@ -12,7 +12,6 @@
 #endif
 
 #include <PacketSerial.h>
-#include "Sensors.h"
 #include "typyBitowe.h"
 #include "config.h"
 

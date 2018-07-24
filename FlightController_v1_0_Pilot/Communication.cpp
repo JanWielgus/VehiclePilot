@@ -73,7 +73,7 @@ void CommunicationClass::odbierzPriv(const uint8_t* bufferR, size_t PacketSize)
 		randomRxValue = bufferR[22];
 		errorList1.bajt = bufferR[23];
 		errorList2.bajt = bufferR[24];
-		bitsRx1 = bufferR[25];
+		bitsRx1.bajt = bufferR[25];
 		// zapas 6 x uint8 (ostatnie [31])
 		
 		if_odbierzPriv = true;
@@ -269,6 +269,8 @@ void CommunicationClass::setTransmitPower(uint8_t power)
 // overloaded
 void CommunicationClass::setTransmitPower()
 {
+	/*  DO NAPISANIA na potrzeby pilota  !!!
+	
 	if (connectionState())
 	{
 		if (switchesR.b0 == 0) // jesli moc ustawia pilot
@@ -284,6 +286,8 @@ void CommunicationClass::setTransmitPower()
 		// MAX when signal lost
 		setTransmitPower(DBM20); // MAX
 	}
+	
+	*/
 }
 
 
@@ -334,6 +338,8 @@ void CommunicationClass::writeParamsToTransceiver()
 
 void CommunicationClass::getTransceiverParams()
 {
+	/*  DO NAPISANIA na potrzeby pilota  !!!
+	
 	// power
 	settingsConfirmation.b7 = switchesR.b6;
 	settingsConfirmation.b6 = switchesR.b5;
@@ -344,4 +350,6 @@ void CommunicationClass::getTransceiverParams()
 	
 	// OTA speed
 	settingsConfirmation.b3 = switchesR.b2;
+	
+	*/
 }
