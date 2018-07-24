@@ -112,7 +112,7 @@ class CommunicationClass
 	// == RECEIVED ==
 		// ODPOWIEDNIE PRZETWARZANIE ODEBRANYCH ZMIENNYCH W FUNKCJI ODBIERANIA (na przyklad dzielenie przez 10)
 		float cellVoltage[6];              // napiecie na poszeczegolnych celach [decy V]
-		uint8_t pitch, roll;               // przechylenie i pochylenie drona [stopnie]
+		int8_t pitch, roll;               // przechylenie i pochylenie drona [stopnie]
 		uint16_t heading;                  // heading (kat wzgledem polnocy) [stopnie]
 		int16_t altitude;                  // wysokosc [cm]
 		int32Byte pos_longInt, pos_latInt; // Dlugosc i szerokosc geograficzna * 10^6? (zobaczyc czy to czy float)

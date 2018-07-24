@@ -238,12 +238,6 @@
     <Compile Include="ControlPanelApp.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Komunikacja.cpp">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Komunikacja.h">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="typyBitowe.h">
       <SubType>compile</SubType>
     </Compile>
