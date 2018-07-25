@@ -100,6 +100,10 @@
 	
 // ADDRESSES
 	#define LCD_ADDRESS 0x3F
+	
+	
+// CONSTS
+	#define ZERO_STEERING 5    // +- tyle musi byc aby uznac ze drazek jest w zerze
 
 
 

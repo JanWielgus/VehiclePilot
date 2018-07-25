@@ -20,7 +20,7 @@
 class CustomDiodeLibClass
 {
  public:
-	CustomDiodeLibClass(int pin, bool isPwm);
+	CustomDiodeLibClass(int pin, bool isPwm=false);
 	void init();
 	void setPattern(uint8_t pattern=2, uint16_t interv=500); // Zmiana schematu swiecenia
 	void runDiode(); // do uzywania w loop. Obsluguje diode

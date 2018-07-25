@@ -11,10 +11,16 @@
 #include "CustomDiodeLib.h"
 #include "config.h"
 
+// Functions
+void gestureRecognition();        // Obsluguje rozpoznawanie gestow. Trzeba wywolywac w kazdym loopie
+
 //SoftwareSerial software_serial(tx_pin, rx_pin); // zapasowy dla mudulu BT
 LiquidCrystal_I2C lcd(LCD_ADDRESS, 16, 2);
 CustomDiodeLibClass red(redDiodePin, true);
 CustomDiodeLibClass green(greenDiodePin, true);
+
+
+bool gestureDiodeSteernig = false;   // true - rozpoznawanie gestow steruje dioda (priorytet), false - normalne sterowanie dioda
 
 
 void setup()
@@ -43,7 +49,7 @@ void loop()
 {
 	// <<<<< ====== ---  GLOWNE  --- ====== >>>>>
 	
-	//kom.odbierz(); // nie dziala przy starych radiach
+	com.odbierz();
 	
 	#ifdef USE_PC_APP
 		static int32_t lastCpaRTime = 0; // czas oststniego odebrania danych od posrednika I2C pc app
@@ -99,11 +105,88 @@ void loop()
 	// <<<<< ====== ---  RZECZY POBOCZNE  --- ====== >>>>>
 
 	// Naraznie testowe
-	if (com.connectionState()) green.setPattern(DIODE_ON);
-	else green.setPattern(DIODE_OFF);
+	if (!gestureDiodeSteernig) // jesli diodami nie steruje rozpoznawanie gestow
+	{
+		com.connectionState() ? green.setPattern(DIODE_ON) : green.setPattern(DIODE_OFF);
+		//if (com.connectionState()) green.setPattern(DIODE_ON);
+		//else green.setPattern(DIODE_OFF);
+		com.armState ? red.setPattern(DIODE_ON) : red.setPattern(DIODE_OFF);
+	}
 	
 	red.runDiode();
 	green.runDiode();
 	
 	//delay(48);  // ========asdfasdfajsdkj     DO PRZEMYSLENIA  !!! 
+}
+
+
+
+//  FUNCTIONS \/
+
+
+void gestureRecognition()
+{ // sX - stage X
+// ZMIENNE
+	static bool s0ThrottleIdle;    // true - throttle na dole
+	static bool s0RotateIdle;      // true - rotate na srodku
+	static bool s0TiltTBIdle;      // true - tiltTB na srodku
+	static bool s0TiltLRIdle;      // true - tiltLR na srodku
+	
+	// Uzbrajanie
+	static bool s1RotateRightBegan;     // rotate jest trzymane w prawo
+	static bool s1RotateRightCompleted; // etap z rotate ejst zakonczony
+	static uint32_t s1StartTime;        // Czas trwania s1 (jesli zbyt krotko to przerywane)
+	
+	// Wlaczanie menu
+	//...
+	
+	//////////////////////////////////////////////////////////////////////////
+	
+	// Sprawdzenie czy drazki sa w pozycjach neutralnych
+	s0ThrottleIdle = (com.pilot.throttle < ZERO_STEERING) ? true : false;
+	s0RotateIdle = (com.pilot.rotate > -ZERO_STEERING && com.pilot.rotate < ZERO_STEERING) ? true : false;
+	s0TiltTBIdle = (com.pilot.tilt_TB > -ZERO_STEERING && com.pilot.tilt_TB < ZERO_STEERING) ? true : false;
+	s0TiltLRIdle = (com.pilot.tilt_LR > -ZERO_STEERING && com.pilot.tilt_LR < ZERO_STEERING) ? true : false;
+	
+	if (com.armState < 50) // jest rozbrojony - rozpoznawanie gestow
+	{
+		if (s0ThrottleIdle && s0TiltTBIdle && s0TiltLRIdle)
+		{
+			// Rozpoznawanie uzbrojenia
+			// ETAP 1
+				if (com.pilot.throttle < 430) // drazek nie jest w pozycji do uzbrajania
+				{
+					s1RotateRightBegan = false;
+					s1RotateRightCompleted = false;
+					gestureDiodeSteernig = false; // dioda nie steruje wykrywanie gestow
+				}
+				else if (s1RotateRightBegan && (millis()-s1StartTime) >= 2000) // jesli rozpoczeto trzymanie i trzymano przez min 2s
+				{
+					s1RotateRightCompleted = true;
+					green.setPattern(2, 400); // miganie 400ms
+				}
+				else // pierwsze wykrycie rotate w prawo
+				{
+					s1StartTime = millis();
+					s1RotateRightBegan = true;
+					gestureDiodeSteernig = true;
+					red.setPattern(4, 2000); // rozjasnianie w 2s
+					green.setPattern(DIODE_OFF);
+				}
+			// ETAP 2
+				if (s1RotateRightCompleted)
+				{
+					
+				}
+			
+			
+			// Rozpoznawanie wlaczania menu
+			// ...
+		}
+	}
+	else // jest uzbrojony  -  tylko rozpoznawanie rozbrojenia
+	{
+		
+	}
+		
 }

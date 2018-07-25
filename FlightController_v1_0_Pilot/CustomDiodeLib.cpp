@@ -7,7 +7,7 @@
 //CustomDiodeLibClass CustomDiodeLib;
 
 
-CustomDiodeLibClass::CustomDiodeLibClass(int pin, bool isPwm)
+CustomDiodeLibClass::CustomDiodeLibClass(int pin, bool isPwm=false)
 {
 	this->pin = pin;
 	this->isPwm = isPwm;
