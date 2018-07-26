@@ -102,7 +102,7 @@ void loop()
 #endif
 	
 	
-	//com.wyslij(PILOT_RAMKA_TEST_TYPE);   // DO PRZEBUDOWY
+	com.wyslij(PILOT_RAMKA_VER1_TYPE);   // DO PRZEBUDOWY
 	
 	#ifdef USE_PC_APP
 		// Calc steering data for pc app
@@ -131,6 +131,8 @@ void loop()
 	
 	//delay(48);  // ========asdfasdfajsdkj     DO PRZEMYSLENIA  !!! 
 }
+
+
 
 
 
