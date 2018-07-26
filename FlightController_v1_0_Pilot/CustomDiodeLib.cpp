@@ -22,19 +22,25 @@ void CustomDiodeLibClass::init()
 
 void CustomDiodeLibClass::setPattern(uint8_t ptn=2 , uint16_t p1=501, uint16_t p2=0)
 {
+	static uint8_t last_ptn = pattern;
 	param1 = p1;
 	param2 = p2;
 	
-	if (pattern != ptn) // jesli jest zmiana patternu
+	if (ptn != last_ptn || ptn == 3) // jesli jest zmiana patternu albo to jest 3
 	{
-		if (pattern == 2)
+		if (ptn == 2)
 		{
 			pattern = 4; // najpierw rozjasnianie
 			isBlinkModeFlag = true; // ma zmieniac z pat4 na pat5 i odwrotnie
 		}
-		else isBlinkModeFlag = false;
+		else
+		{
+			isBlinkModeFlag = false;
+			pattern = ptn;
+		}
+		last_ptn = ptn;
 		
-		switch(pattern = ptn)
+		switch(pattern)
 		{
 			case DIODE_OFF:
 				value = 0;
@@ -75,9 +81,12 @@ void CustomDiodeLibClass::runDiode()
 		
 	
 	if (pattern == 4) // 0 - 100
-	{		
+	{
 		if (tNow < endTime) // dzialamy
-			value += (float)MAX_PWM / ((float)actionTime/dtMs);
+		{
+			float toAdd = (float)MAX_PWM / ((float)actionTime/dtMs);
+			value += toAdd<=256?toAdd:1; // Jesli poleci duza wartosc to ignoruj i dodaj 1
+		}
 			
 		else // zmiana jesli jest blink mode
 		{
@@ -94,7 +103,10 @@ void CustomDiodeLibClass::runDiode()
 	else if (pattern == 5) // 100 - 0
 	{
 		if (tNow < endTime)
-			value -= (float)MAX_PWM / ((float)actionTime/dtMs);
+		{
+			float toSubtr = (float)MAX_PWM / ((float)actionTime/dtMs);
+			value -= toSubtr<=256?toSubtr:1; // Jesli poleci duza wartosc to ignoruj i odejmij 1
+		}
 		
 		else
 		{
