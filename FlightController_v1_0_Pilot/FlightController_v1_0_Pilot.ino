@@ -36,10 +36,6 @@ void setup()
 	// init diodes
 	red.init();
 	green.init();
-	red.setPattern(4, 500);
-	red.runDiode();
-	green.setPattern(5, 500);
-	green.runDiode();
 	
 	cpa.init();
 	//Wire.setClock(400000L); // 400kHz  DO PRZETESTOWANIA !!! jak zadziala to uzyc z tym
@@ -48,9 +44,16 @@ void setup()
 	lcd.setCursor(0,0);
 	lcd.print("Pilot drona :)");
 	
+	// DALEJ NARAZIE NIERUSZAC - JAKIES NADPRZYRODZONE
+	green.setPattern(2, 100);
+	red.setPattern(1);
 	// czekaj 500ms
 	uint32_t st = millis();
-	while (millis()-st < 500);
+	while (millis()-st < 500)
+	{
+		green.runDiode();
+		red.runDiode();
+	}
 }
 
 void loop()
@@ -112,6 +115,7 @@ void loop()
 	#endif
 	
 	
+	gestureRecognition();
 	
 	// <<<<< ====== ---  RZECZY POBOCZNE  --- ====== >>>>>
 
@@ -119,9 +123,7 @@ void loop()
 	if (!gestureDiodeSteernigFlag) // jesli diodami nie steruje rozpoznawanie gestow
 	{
 		com.connectionState() ? green.setPattern(DIODE_ON) : green.setPattern(DIODE_OFF);
-		//if (com.connectionState()) green.setPattern(DIODE_ON);
-		//else green.setPattern(DIODE_OFF);
-		com.armState ? red.setPattern(DIODE_ON) : red.setPattern(DIODE_OFF);
+		com.armState>50 ? red.setPattern(DIODE_ON) : red.setPattern(DIODE_OFF);
 	}
 	
 	red.runDiode();
@@ -165,30 +167,30 @@ void gestureRecognition()
 		if (s0ThrottleIdle && s0TiltTBIdle && s0TiltLRIdle && !s1RotateRightCompleted) // warunek do rozpoczecia etapu 1
 		{
 			// ETAP 1
-			if (com.pilot.throttle < 430) // drazek nie jest w pozycji do uzbrajania
+			if (com.pilot.rotate < 430) // drazek nie jest w pozycji do uzbrajania
 			{
 				s1RotateRightBegan = false;
 				s1RotateRightCompleted = false;
 				gestureDiodeSteernigFlag = false; // dioda nie steruje wykrywanie gestow
 			}
-			else if (s1RotateRightBegan && !s1RotateRightCompleted && (millis()-s1StartTime) >= 2000) // jesli rozpoczeto trzymanie i trzymano przez min 2s
+			else if (s1RotateRightBegan && !s1RotateRightCompleted && (millis()-s1StartTime) >= ARMING_S1_MIN_TIME) // jesli rozpoczeto trzymanie i trzymano przez min 1s
 			{
 				s1RotateRightCompleted = true;
-				green.setPattern(2, 400); // miganie 400ms
+				green.setPattern(2, 200); // miganie 400ms
 			}
 			else if (!s1RotateRightBegan) // pierwsze wykrycie rotate w prawo
 			{
 				s1StartTime = millis();
 				s1RotateRightBegan = true;
 				gestureDiodeSteernigFlag = true;
-				red.setPattern(4, 2000); // rozjasnianie w 2s
+				red.setPattern(4, ARMING_S1_MIN_TIME); // rozjasnianie w 1s
 				green.setPattern(DIODE_OFF);
 			}
 		}
 		else if(s0ThrottleIdle && s1RotateRightCompleted && s0TiltTBIdle && !s2TiltLRCompleted) // warunek do rozpoczecia etapu 2
 		{
 			// ETAP 2
-			if ((millis()-s1StartTime-2000) < 700 && com.pilot.rotate > 430) // jesli miesci sie w czasie i jesli rotate jest trzymane
+			if ((millis()-s1StartTime-ARMING_S1_MIN_TIME) < ARMING_S23_MAX_TIME && com.pilot.rotate > 430) // jesli miesci sie w czasie i jesli rotate jest trzymane
 			{
 				if (com.pilot.tilt_LR < -430)
 				{
@@ -207,7 +209,7 @@ void gestureRecognition()
 		else if (s2TiltLRCompleted) // jesli LR zostal przesuniety w bok, czekanie na powrot do pozycji neutralnych
 		{
 			// ETAP 3
-			if ((millis()-s1StartTime-2000) < 700) // jesli nie trwa to juz dluzej niz 700ms
+			if ((millis()-s1StartTime-ARMING_S1_MIN_TIME) < ARMING_S23_MAX_TIME) // jesli nie trwa to juz dluzej niz 700ms
 			{
 				if (s0ThrottleIdle && s0RotateIdle && s0TiltTBIdle && s0TiltLRIdle) // jesli drazki powrocily do neutralnych pozycji
 				{
@@ -238,7 +240,7 @@ void gestureRecognition()
 	// ROZBRAJANIE
 	else // jest uzbrojony  -  tylko rozpoznawanie rozbrojenia
 	{
-		
+		if (com.pilot.throttle > 500) com.armState = 0; // TYMCZASOWE ROZBRAJANIE
 	}
 		
 }

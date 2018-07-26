@@ -17,7 +17,7 @@
 	
 
 // CONTROL_PANEL_APP
-	#define USE_PC_APP // Czy wlaczac obsluge apki pc. Jesli nie ma pidowania albo nie potrzeba czegos wyswietlac to nie ma sensu
+	//#define USE_PC_APP // Czy wlaczac obsluge apki pc. Jesli nie ma pidowania albo nie potrzeba czegos wyswietlac to nie ma sensu
 	#define CPA_I2C    // Brakuje protow UART dlatego komunikacja bedzie musiala przebiegac przez zewnetrzne urzadzenie I2C
 
 
@@ -103,7 +103,11 @@
 	
 	
 // CONSTS
-	#define ZERO_STEERING 5    // +- tyle musi byc aby uznac ze drazek jest w zerze
+	#define ZERO_STEERING 10    // +- tyle musi byc aby uznac ze drazek jest w zerze
+	
+	// Uzbrajanie
+	#define ARMING_S1_MIN_TIME 1000
+	#define ARMING_S23_MAX_TIME 1500
 
 
 

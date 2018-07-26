@@ -26,8 +26,9 @@ void CustomDiodeLibClass::setPattern(uint8_t ptn=2 , uint16_t p1=501, uint16_t p
 	param1 = p1;
 	param2 = p2;
 	
-	if (ptn != last_ptn || ptn == 3) // jesli jest zmiana patternu albo to jest 3
+	if (ptn != last_ptn || ptn == 3 || ptn == 0 || ptn == 1) // jesli jest zmiana patternu albo to jest 3
 	{
+		last_ptn = ptn;
 		if (ptn == 2)
 		{
 			pattern = 4; // najpierw rozjasnianie
@@ -38,7 +39,6 @@ void CustomDiodeLibClass::setPattern(uint8_t ptn=2 , uint16_t p1=501, uint16_t p
 			isBlinkModeFlag = false;
 			pattern = ptn;
 		}
-		last_ptn = ptn;
 		
 		switch(pattern)
 		{
@@ -78,6 +78,7 @@ void CustomDiodeLibClass::runDiode()
 		uint32_t tNow = millis();
 		dtMs = tNow - lastTime;
 		lastTime = tNow;
+		dtMs = 3;  //  TEMP !!!!!!
 		
 	
 	if (pattern == 4) // 0 - 100
