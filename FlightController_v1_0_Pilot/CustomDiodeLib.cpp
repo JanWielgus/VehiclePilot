@@ -20,30 +20,98 @@ void CustomDiodeLibClass::init()
 }
 
 
-void CustomDiodeLibClass::setPattern(uint8_t pattern=2 , uint16_t interv=500)
+void CustomDiodeLibClass::setPattern(uint8_t ptn=2 , uint16_t p1=501, uint16_t p2=0)
 {
-	//...
+	param1 = p1;
+	param2 = p2;
 	
-	runDiode();
+	if (pattern != ptn) // jesli jest zmiana patternu
+	{
+		if (pattern == 2)
+		{
+			pattern = 4; // najpierw rozjasnianie
+			isBlinkModeFlag = true; // ma zmieniac z pat4 na pat5 i odwrotnie
+		}
+		else isBlinkModeFlag = false;
+		
+		switch(pattern = ptn)
+		{
+			case DIODE_OFF:
+				value = 0;
+				break;
+			case DIODE_ON:
+				value = MAX_PWM;
+				break;
+			case 3: // brightness
+				if (p2 == 0) value = constrain(p1, 0, MAX_PWM);
+				else value = 0;
+				break;
+			case 4: // 0 - 100
+				value = 0;
+				break;
+			case 5: // 100 - 0
+				value = MAX_PWM;
+				break;
+			default:
+				pattern = 1;
+				value = MAX_PWM;
+				break;
+		}
+		
+		actionTime = p1;
+		endTime = millis()+actionTime; // pierwsze obliczenie czasu konca
+	}
 }
 
 
 void CustomDiodeLibClass::runDiode()
 {
-	switch(pattern)
-	{
-		case DIODE_OFF:
-			digitalWrite(pin, LOW);
-			break;
+	// Obliczane dt
+		static uint32_t lastTime=0;
+		static uint16_t dtMs; // delta time [ms]
+		uint32_t tNow = millis();
+		dtMs = tNow - lastTime;
+		lastTime = tNow;
+		
+	
+	if (pattern == 4) // 0 - 100
+	{		
+		if (tNow < endTime) // dzialamy
+			value += (float)MAX_PWM / ((float)actionTime/dtMs);
 			
-		case DIODE_ON:
-			digitalWrite(pin, HIGH);
-			break;
-			
-		default:
-			digitalWrite(pin, HIGH);
-			break;
+		else // zmiana jesli jest blink mode
+		{
+			value = MAX_PWM; // powinno byc zapalone
+			if (isBlinkModeFlag)
+			{
+				pattern = 5;
+				actionTime = param2!=0 ? param2 : param1; // wybranie
+				endTime = tNow + actionTime; // obliczanie czasu konca akcji
+			}
+		}
 	}
+	
+	else if (pattern == 5) // 100 - 0
+	{
+		if (tNow < endTime)
+			value -= (float)MAX_PWM / ((float)actionTime/dtMs);
+		
+		else
+		{
+			value = 0; // powinno byc zero
+			if (isBlinkModeFlag)
+			{
+				pattern = 4;
+				actionTime = param1; // zawsze rosnie z param1
+				endTime = tNow + actionTime; // obliczenie czasu konca
+			}
+		}
+	}
+
+
+	// Write value on pin
+	value = constrain(value, 0, MAX_PWM);
+	isPwm ? analogWrite(pin, (uint8_t)value) : digitalWrite(pin, value>127?HIGH:LOW);
 }
 
 

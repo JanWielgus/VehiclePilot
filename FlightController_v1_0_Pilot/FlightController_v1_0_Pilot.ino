@@ -36,6 +36,10 @@ void setup()
 	// init diodes
 	red.init();
 	green.init();
+	red.setPattern(4, 500);
+	red.runDiode();
+	green.setPattern(5, 500);
+	green.runDiode();
 	
 	cpa.init();
 	//Wire.setClock(400000L); // 400kHz  DO PRZETESTOWANIA !!! jak zadziala to uzyc z tym
@@ -43,6 +47,10 @@ void setup()
 	lcd.backlight();
 	lcd.setCursor(0,0);
 	lcd.print("Pilot drona :)");
+	
+	// czekaj 500ms
+	uint32_t st = millis();
+	while (millis()-st < 500);
 }
 
 void loop()
@@ -76,6 +84,9 @@ void loop()
 	com.pilot.tilt_TB = constrain(map(long(lastTiltTB), 900, 20, -450, 450), -450, 450);
 	com.pilot.tilt_LR = constrain(map(long(lastTIltLR), 982, 67, -450, 450), -450, 450);
 	
+	//lcd.setCursor(0, 1);
+	//lcd.print(com.pilot.throttle);
+	
 	#ifdef _INO_DEBUG
 		Serial.print("DRAZKI: THR: ");
 		Serial.print(com.pilot.throttle);
@@ -105,7 +116,7 @@ void loop()
 	// <<<<< ====== ---  RZECZY POBOCZNE  --- ====== >>>>>
 
 	// Naraznie testowe
-	if (!gestureDiodeSteernig) // jesli diodami nie steruje rozpoznawanie gestow
+	if (!gestureDiodeSteernigFlag) // jesli diodami nie steruje rozpoznawanie gestow
 	{
 		com.connectionState() ? green.setPattern(DIODE_ON) : green.setPattern(DIODE_OFF);
 		//if (com.connectionState()) green.setPattern(DIODE_ON);
@@ -180,7 +191,10 @@ void gestureRecognition()
 			if ((millis()-s1StartTime-2000) < 700 && com.pilot.rotate > 430) // jesli miesci sie w czasie i jesli rotate jest trzymane
 			{
 				if (com.pilot.tilt_LR < -430)
+				{
 					s2TiltLRCompleted = true;
+					green.setPattern(5, s1StartTime+2700-millis()); // zgaszanie diody zielonej przez pozostaly czas
+				}
 			}
 			else // za dlugo albo rotate nie zostalo utrzymane
 			{
@@ -220,6 +234,8 @@ void gestureRecognition()
 			gestureDiodeSteernigFlag = false; // dioda nie steruje wykrywanie gestow
 		}
 	}
+	
+	// ROZBRAJANIE
 	else // jest uzbrojony  -  tylko rozpoznawanie rozbrojenia
 	{
 		
