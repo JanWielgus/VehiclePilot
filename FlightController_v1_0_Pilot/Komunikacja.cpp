@@ -3,7 +3,7 @@
 // 
 
 #include "Komunikacja.h"
-KomunikacjaClass kom;
+//KomunikacjaClass kom;
 
 void _protOdbierz(const uint8_t* buffer, size_t size)
 {

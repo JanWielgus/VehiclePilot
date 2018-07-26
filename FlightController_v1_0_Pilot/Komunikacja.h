@@ -67,7 +67,7 @@ class KomunikacjaClass
 	bitByte pong;
 };
 
-extern KomunikacjaClass kom;
+//extern KomunikacjaClass kom;
 
 #endif
 
