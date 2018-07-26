@@ -20,7 +20,7 @@ CustomDiodeLibClass red(redDiodePin, true);
 CustomDiodeLibClass green(greenDiodePin, true);
 
 
-bool gestureDiodeSteernig = false;   // true - rozpoznawanie gestow steruje dioda (priorytet), false - normalne sterowanie dioda
+bool gestureDiodeSteernigFlag = false;   // true - rozpoznawanie gestow steruje dioda (priorytet), false - normalne sterowanie dioda
 
 
 void setup()
@@ -136,6 +136,7 @@ void gestureRecognition()
 	static bool s1RotateRightBegan;     // rotate jest trzymane w prawo
 	static bool s1RotateRightCompleted; // etap z rotate ejst zakonczony
 	static uint32_t s1StartTime;        // Czas trwania s1 (jesli zbyt krotko to przerywane)
+	static bool s2TiltLRCompleted;      // czy LR jest w lewo
 	
 	// Wlaczanie menu
 	//...
@@ -150,38 +151,73 @@ void gestureRecognition()
 	
 	if (com.armState < 50) // jest rozbrojony - rozpoznawanie gestow
 	{
-		if (s0ThrottleIdle && s0TiltTBIdle && s0TiltLRIdle)
+		if (s0ThrottleIdle && s0TiltTBIdle && s0TiltLRIdle && !s1RotateRightCompleted) // warunek do rozpoczecia etapu 1
 		{
-			// Rozpoznawanie uzbrojenia
 			// ETAP 1
-				if (com.pilot.throttle < 430) // drazek nie jest w pozycji do uzbrajania
+			if (com.pilot.throttle < 430) // drazek nie jest w pozycji do uzbrajania
+			{
+				s1RotateRightBegan = false;
+				s1RotateRightCompleted = false;
+				gestureDiodeSteernigFlag = false; // dioda nie steruje wykrywanie gestow
+			}
+			else if (s1RotateRightBegan && !s1RotateRightCompleted && (millis()-s1StartTime) >= 2000) // jesli rozpoczeto trzymanie i trzymano przez min 2s
+			{
+				s1RotateRightCompleted = true;
+				green.setPattern(2, 400); // miganie 400ms
+			}
+			else if (!s1RotateRightBegan) // pierwsze wykrycie rotate w prawo
+			{
+				s1StartTime = millis();
+				s1RotateRightBegan = true;
+				gestureDiodeSteernigFlag = true;
+				red.setPattern(4, 2000); // rozjasnianie w 2s
+				green.setPattern(DIODE_OFF);
+			}
+		}
+		else if(s0ThrottleIdle && s1RotateRightCompleted && s0TiltTBIdle && !s2TiltLRCompleted) // warunek do rozpoczecia etapu 2
+		{
+			// ETAP 2
+			if ((millis()-s1StartTime-2000) < 700 && com.pilot.rotate > 430) // jesli miesci sie w czasie i jesli rotate jest trzymane
+			{
+				if (com.pilot.tilt_LR < -430)
+					s2TiltLRCompleted = true;
+			}
+			else // za dlugo albo rotate nie zostalo utrzymane
+			{
+				s1RotateRightBegan = false;
+				s1RotateRightCompleted = false;
+				s2TiltLRCompleted = false;
+				gestureDiodeSteernigFlag = false;
+			}
+		}
+		else if (s2TiltLRCompleted) // jesli LR zostal przesuniety w bok, czekanie na powrot do pozycji neutralnych
+		{
+			// ETAP 3
+			if ((millis()-s1StartTime-2000) < 700) // jesli nie trwa to juz dluzej niz 700ms
+			{
+				if (s0ThrottleIdle && s0RotateIdle && s0TiltTBIdle && s0TiltLRIdle) // jesli drazki powrocily do neutralnych pozycji
 				{
+					com.armState = 100;          // UZBRAJANIE <<<
 					s1RotateRightBegan = false;
 					s1RotateRightCompleted = false;
-					gestureDiodeSteernig = false; // dioda nie steruje wykrywanie gestow
+					s2TiltLRCompleted = false;
+					gestureDiodeSteernigFlag = false;
 				}
-				else if (s1RotateRightBegan && (millis()-s1StartTime) >= 2000) // jesli rozpoczeto trzymanie i trzymano przez min 2s
-				{
-					s1RotateRightCompleted = true;
-					green.setPattern(2, 400); // miganie 400ms
-				}
-				else // pierwsze wykrycie rotate w prawo
-				{
-					s1StartTime = millis();
-					s1RotateRightBegan = true;
-					gestureDiodeSteernig = true;
-					red.setPattern(4, 2000); // rozjasnianie w 2s
-					green.setPattern(DIODE_OFF);
-				}
-			// ETAP 2
-				if (s1RotateRightCompleted)
-				{
-					
-				}
-			
-			
-			// Rozpoznawanie wlaczania menu
-			// ...
+			}
+			else // za dlugo
+			{
+				s1RotateRightBegan = false;
+				s1RotateRightCompleted = false;
+				s2TiltLRCompleted = false;
+				gestureDiodeSteernigFlag = false;
+			}
+		}
+		else // Drazki nie sa w pozycjach neutralnych wiec na pewno przerwanae
+		{
+			s1RotateRightBegan = false;
+			s1RotateRightCompleted = false;
+			s2TiltLRCompleted = false;
+			gestureDiodeSteernigFlag = false; // dioda nie steruje wykrywanie gestow
 		}
 	}
 	else // jest uzbrojony  -  tylko rozpoznawanie rozbrojenia
