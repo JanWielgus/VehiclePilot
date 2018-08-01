@@ -76,6 +76,9 @@
 	#define DBM8 2  // 8dBm
 	#define DBM2 1  // 2dBm
 	
+	#define M0pin 10
+	#define M1pin 9
+	
 	
 // <<<<<<<<<=====================     PINY     =====================>>>>>>>>>
 	
@@ -108,6 +111,25 @@
 	// Uzbrajanie
 	#define ARMING_S1_MIN_TIME 1000
 	#define ARMING_S23_MAX_TIME 1500
+	
+	// Drazki
+		// Throttle
+			#define ThrottleMin 65
+			//#define ThrottleMid 500
+			#define ThrottleMax 960
+		// Rotate
+			#define RotateMin 48
+			#define RotateMid 514
+			#define RotateMax 970
+		// TB
+			#define TiltTBMin 16
+			#define TiltTBMid 490
+			#define TiltTBMax 900
+		// LR
+			#define TiltLRMin 65
+			#define TiltLRMid 526
+			#define TiltLRMax 984
+		#define DeadZone 20
 
 
 

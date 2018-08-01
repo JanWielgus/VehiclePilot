@@ -19,14 +19,21 @@ LiquidCrystal_I2C lcd(LCD_ADDRESS, 16, 2);
 CustomDiodeLibClass red(redDiodePin, true);
 CustomDiodeLibClass green(greenDiodePin, true);
 
-
+uint32_t lastLoopTime=0;
 bool gestureDiodeSteernigFlag = false;   // true - rozpoznawanie gestow steruje dioda (priorytet), false - normalne sterowanie dioda
+
+float lastThrottle=0;
+float lastRotate=0;
+float lastTiltTB=0;
+float lastTiltLR=0;
+uint16_t rawThr, rawRot, rawTB, rawLR;
+
 
 
 void setup()
 {
 	#ifdef _INO_DEBUG
-		Serial.begin(9600);
+		Serial.begin(115200); // Jesli baud rate jest inny niz komunikacji to trzeba komentowac komunikacje !!! (komunikacja leci po tym samym URAT)
 		Serial.println("INO DEBUG has sterted");
 #endif
 
@@ -37,26 +44,79 @@ void setup()
 	red.init();
 	green.init();
 	
-	cpa.init();
-	//Wire.setClock(400000L); // 400kHz  DO PRZETESTOWANIA !!! jak zadziala to uzyc z tym
-	
+	#ifdef _COM_DEBUG
+		cpa.init();
+		//Wire.setClock(400000L); // 400kHz  DO PRZETESTOWANIA !!! jak zadziala to uzyc z tym
+#endif
+	Wire.setClock(400000L); // 400kHz  DO PRZETESTOWANIA !!!
+
 	lcd.backlight();
 	lcd.setCursor(0,0);
 	lcd.print("Pilot drona :)");
-	
+	lcd.setCursor(0, 1);
+	lcd.print("ver 1.1");
+	lcd.home();
 	// DALEJ NARAZIE NIERUSZAC - JAKIES NADPRZYRODZONE
 	green.setPattern(2, 100);
 	red.setPattern(1);
 	// czekaj 500ms
+	
 	uint32_t st = millis();
 	while (millis()-st < 500)
 	{
 		green.runDiode();
 		red.runDiode();
 	}
+	
+	#ifdef _INO_DEBUG
+		Serial.println("End of setup()");
+#endif
 }
 
 void loop()
+{
+	// Obliczanie drazkow
+	// Swap (na dole jest najwieksza a na gorze najmniejsza dlatego trzeba odwrocic)
+	rawThr = abs(analogRead(pinThrottle) - (ThrottleMin+ThrottleMax));
+	rawRot = abs(analogRead(pinRotate) - (RotateMin+RotateMax));
+	rawTB = abs(analogRead(pinTiltTB) - (TiltTBMin+TiltTBMax));
+	rawLR = abs(analogRead(pinTiltLR) - (TiltLRMin+TiltLRMax));
+	// EWA filters
+	lastThrottle = STEERING_FILTER_BETA*lastThrottle + (1-STEERING_FILTER_BETA)*rawThr;
+	lastRotate = STEERING_FILTER_BETA*lastRotate + (1-STEERING_FILTER_BETA)*rawRot;
+	lastTiltTB = STEERING_FILTER_BETA*lastTiltTB + (1-STEERING_FILTER_BETA)*rawTB;
+	lastTiltLR = STEERING_FILTER_BETA*lastTiltLR + (1-STEERING_FILTER_BETA)*rawLR;
+	// maps ans constrains (final step)
+		// Throttle
+		if (lastThrottle > ThrottleMin+DeadZone)
+			com.pilot.throttle = constrain(map(lastThrottle, ThrottleMin+DeadZone, ThrottleMax, 0, 1000), 0, 1000);
+		else
+			com.pilot.throttle = 0;
+		// Rotate
+		if (lastRotate > RotateMid+DeadZone)
+			com.pilot.rotate = constrain(map(lastRotate, RotateMid+DeadZone, RotateMax, 0, 450), 0, 450);
+		else if (lastRotate < RotateMid-DeadZone)
+			com.pilot.rotate = constrain(map(lastRotate, RotateMin, RotateMid-DeadZone, -450, 0), -450, 0);
+		else
+			com.pilot.rotate = 0;
+		// Tilt TB
+		if (lastTiltTB > TiltTBMid+DeadZone)
+			com.pilot.tilt_TB = constrain(map(lastTiltTB, TiltTBMid+DeadZone, TiltTBMax, 0, 450), 0, 450);
+		else if (lastTiltTB < TiltTBMid-DeadZone)
+			com.pilot.tilt_TB = constrain(map(lastTiltTB, TiltTBMin, TiltTBMid-DeadZone, -450, 0), -450, 0);
+		else
+			com.pilot.tilt_TB = 0;
+		// Tilt LR
+		if (lastTiltLR > TiltLRMid+DeadZone)
+			com.pilot.tilt_LR = constrain(map(lastTiltLR, TiltLRMid+DeadZone, TiltLRMax, 0, 450), 0, 450);
+		else if (lastTiltLR < TiltLRMid-DeadZone)
+			com.pilot.tilt_LR = constrain(map(lastTiltLR, TiltLRMin, TiltLRMid-DeadZone, -450, 0), -450, 0);
+		else
+			com.pilot.tilt_LR = 0;
+	
+	
+	
+if (millis()-lastLoopTime > 48) // 20 Hz
 {
 	// <<<<< ====== ---  GLOWNE  --- ====== >>>>>
 	
@@ -71,26 +131,12 @@ void loop()
 		}
 	#endif
 	
-// Obliczanie drazkow
-	static float lastThrottle=0;
-	static float lastRotate=0;
-	static float lastTiltTB=0;
-	static float lastTIltLR=0;
-	// EWA filters
-	lastThrottle = STEERING_FILTER_BETA*lastThrottle + (1-STEERING_FILTER_BETA)*analogRead(pinThrottle);
-	lastRotate = STEERING_FILTER_BETA*lastRotate + (1-STEERING_FILTER_BETA)*analogRead(pinRotate);
-	lastTiltTB = STEERING_FILTER_BETA*lastTiltTB + (1-STEERING_FILTER_BETA)*analogRead(pinTiltTB);
-	lastTIltLR = STEERING_FILTER_BETA*lastTIltLR + (1-STEERING_FILTER_BETA)*analogRead(pinTiltLR);
-	// maps ans constrains (final step)
-	com.pilot.throttle = constrain(map(long(lastThrottle), 960, 65, 0, 1000), 0, 1000);
-	com.pilot.rotate = constrain(map(long(lastRotate), 968, 50, -450, 450), -450, 450);
-	com.pilot.tilt_TB = constrain(map(long(lastTiltTB), 900, 20, -450, 450), -450, 450);
-	com.pilot.tilt_LR = constrain(map(long(lastTIltLR), 982, 67, -450, 450), -450, 450);
-	
-	//lcd.setCursor(0, 1);
-	//lcd.print(com.pilot.throttle);
+	lcd.setCursor(0, 1);
+	lcd.print(com.pilot.throttle);
+	lcd.print("|");
 	
 	#ifdef _INO_DEBUG
+	
 		Serial.print("DRAZKI: THR: ");
 		Serial.print(com.pilot.throttle);
 		Serial.print("\tROT: ");
@@ -99,10 +145,19 @@ void loop()
 		Serial.print(com.pilot.tilt_TB);
 		Serial.print("\tLR: ");
 		Serial.println(com.pilot.tilt_LR);
+	/*
+		Serial.print("DRAZKI: THR: ");
+		Serial.print(lastThrottle);
+		Serial.print("\tROT: ");
+		Serial.print(lastRotate);
+		Serial.print("\tTB: ");
+		Serial.print(lastTiltTB);
+		Serial.print("\tLR: ");
+		Serial.println(lastTiltLR);*/
 #endif
 	
 	
-	com.wyslij(PILOT_RAMKA_VER1_TYPE);   // DO PRZEBUDOWY
+	com.wyslij(PILOT_RAMKA_VER1_TYPE);
 	
 	#ifdef USE_PC_APP
 		// Calc steering data for pc app
@@ -129,7 +184,8 @@ void loop()
 	red.runDiode();
 	green.runDiode();
 	
-	//delay(48);  // ========asdfasdfajsdkj     DO PRZEMYSLENIA  !!! 
+lastLoopTime = millis();
+}
 }
 
 

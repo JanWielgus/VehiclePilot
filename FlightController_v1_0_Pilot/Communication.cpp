@@ -26,6 +26,12 @@ void CommunicationClass::init()
 	pSerial.setPacketHandler(_protezaOdbierz);
 	pSerial.begin(BAUD_RATE, serialPort);
 	
+	pinMode(M0pin, OUTPUT);
+	pinMode(M1pin, OUTPUT);
+	// set M0 & M1 to LOW
+	digitalWrite(M0pin, LOW);
+	digitalWrite(M0pin, LOW);
+	
 	// transciever deafult settings
 	head        = 0xC2;
 	addh        = 0x00;
