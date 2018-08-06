@@ -29,7 +29,7 @@
 	
 	#define serialPort 1                      // Serial: 0, Serial1: 1, Serial2: 2, Serial3: 3
 	#define comSerial Serial1                 // Serial with transceiver
-	#define BAUD_RATE 9600                    // With transciever
+	#define BAUD_RATE 115200                  // With transciever
 	#define MAX_SEND_SIZE 45                  // Size of the largest packet (could be higher than needed)
 
 	// Szablon: nadawca_RAMKA_nazwa_SIZE/TYPE
