@@ -28,6 +28,7 @@ void CommunicationClass::init()
 	
 	pinMode(M0pin, OUTPUT);
 	pinMode(M1pin, OUTPUT);
+	pinMode(AUXpin, INPUT);
 	// set M0 & M1 to LOW
 	digitalWrite(M0pin, LOW);
 	digitalWrite(M1pin, LOW);
